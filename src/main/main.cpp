@@ -68,6 +68,7 @@
 #include "qt/updater.h"
 #include "qt/utils.h"
 #include "qt/TailsOS.h"
+#include "qt/VirtualBox.h"
 #include "qt/KeysFiles.h"
 #include "qt/MoneroSettings.h"
 #include "qt/NetworkAccessBlockingFactory.h"
@@ -156,6 +157,8 @@ bool isLinux = false;
 bool isTails = false;
 bool isDesktop = false;
 bool isOpenGL = true;
+bool isVirtualBox = false;
+bool isHardwareAccelerationEnabled = false;
 bool isARM = false;
 
 int main(int argc, char *argv[])
@@ -175,6 +178,8 @@ int main(int argc, char *argv[])
 #elif defined(Q_OS_LINUX)
     bool isLinux = true;
     bool isTails = TailsOS::detect();
+    bool isVirtualBox = VirtualBox::detect();
+    bool isHardwareAccelerationEnabled = isVirtualBox ? VirtualBox::detect3DAcceleration() : false;
 #elif defined(Q_OS_MAC)
     bool isMac = true;
 #endif
@@ -183,8 +188,17 @@ int main(int argc, char *argv[])
 #endif
 
     // detect low graphics mode (start-low-graphics-mode.bat)
-    if(qgetenv("QMLSCENE_DEVICE") == "softwarecontext")
-        isOpenGL = false;
+    if(qgetenv("QMLSCENE_DEVICE") == "softwarecontext") {
+        // enforce opengl renderer if hardware acceleration is enabled
+        if (isVirtualBox && isHardwareAccelerationEnabled) {
+            qDebug() << "Enforcing render to opengl";
+            qputenv("QMLSCENE_DEVICE", "opengl");
+        }
+        else {
+            isOpenGL = false;
+        }
+    }
+
 
 #ifdef Q_OS_MAC
     // macOS window tabbing is not supported
