@@ -7,7 +7,7 @@ add_library(quirc STATIC
 set_target_properties(quirc PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_include_directories(quirc PUBLIC quirc/lib)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 
 set(i2pd_target "i2pd")
 set(i2pd_srcs )
@@ -53,3 +53,4 @@ endif()
 add_library(${i2pd_daemon_target} STATIC ${i2pd_daemon_srcs})
 set_target_properties(${i2pd_daemon_target} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_include_directories(${i2pd_daemon_target} PUBLIC i2pd/daemon/ i2pd/i18n/ i2pd/libi2pd/ i2pd/libi2pd_client)
+target_compile_definitions(i2pd PUBLIC WIN32_LEAN_AND_MEAN)
